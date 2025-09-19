@@ -3,199 +3,1004 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kino Sayt</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #222;
-      padding: 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 28px;
-      color: #f39c12;
-    }
-    .search-box {
-      text-align: center;
-      margin: 20px 0;
-    }
-    .search-box input {
-      padding: 10px;
-      width: 60%;
-      max-width: 400px;
-      border-radius: 5px;
-      border: none;
-      outline: none;
-    }
-    .movies {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .movie {
-      background: #222;
-      border-radius: 10px;
-      overflow: hidden;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-      transition: transform 0.2s;
-      padding-bottom: 15px;
-    }
-    .movie:hover {
-      transform: scale(1.05);
-    }
-    .movie img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-    }
-    .movie h3 {
-      margin: 10px 0;
-      font-size: 18px;
-    }
-    .movie button {
-      padding: 8px 15px;
-      background: #f39c12;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      color: #111;
-      font-weight: bold;
-      margin-top: 5px;
-    }
-    .movie button:hover {
-      background: #e67e22;
-    }
-    /* Modal oynasi */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      width: 80%;
-      max-width: 800px;
-      background: #000;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-    .modal-content iframe {
-      width: 100%;
-      height: 450px;
-    }
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 25px;
-      cursor: pointer;
-      color: #fff;
-    }
-  </style>
+  <title>Lug‘at</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>🎬 Kino Sayt</h1>
-  </header>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 flex flex-col items-center justify-center p-6">
 
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Film qidiring...">
+  <!-- Title -->
+  <h1 class="text-5xl font-extrabold text-blue-600 drop-shadow-md mb-10 text-center">
+    📖 O‘zbekcha – Inglizcha Lug‘at
+  </h1>
+
+  <!-- Search box (so'z kiritadigan joy) -->
+  <div class="w-full max-w-2xl flex gap-3">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="So‘zni kiriting..."
+      class="flex-1 p-5 text-2xl rounded-2xl border-2 border-blue-400 shadow focus:outline-none focus:ring-4 focus:ring-blue-200"
+      onkeydown="if(event.key==='Enter'){searchWord()}"
+    />
+    <button
+      onclick="searchWord()"
+      class="px-6 py-4 text-2xl bg-blue-600 text-white font-semibold rounded-2xl shadow hover:bg-blue-700 active:scale-95 transition"
+    >
+      Izlash 🔍
+    </button>
   </div>
-  <div class="movies" id="moviesList">
-    <div class="movie">
-      <img src="taxi.avif" alt="Film">
-      <h3>Taxi</h3>
-      <button onclick="openMovie('http://asilmedia.org/9165-taksi-1-2-3-4-5-barcha-qismlar-uzbek-tilida-uzbekcha-tarjima-kino-tas-ix.html')">Ko‘rish</button>
-    </div>
-    <div class="movie">
-      <img src="titanic.jpg" alt="Film">
-      <h3>Titanic</h3>
-      <button onclick="openMovie('http://asilmedia.org/9516-titanik-uzbekcha-tarjima-1997-ozbek-tilida-titanik-titanic-tas-ix-skachat.html')">Ko‘rish</button>
-    </div>
-    <div class="movie">
-      <img src="ironman.webp" alt="Film">
-      <h3>Iron Man</h3>
-      <button onclick="openMovie('http://asilmedia.org/8348-temir-odam-2-uzbek-ozbek-tilida-tas-ix-skachat-download.html')">Ko‘rish</button>
-    </div>
-    <div class="movie">
-      <img src="spiderman.jpg" alt="Film">
-      <h3>Spider man</h3>
-      <button onclick="openMovie('http://asilmedia.org/8854-orgimchak-odam-1-uzbek-tarjima-hd-2019-ozbek-tilida-tas-ix-skachat-download.html')">Ko‘rish</button>
-    </div>
-    </div>
-    <div class="movie">
-      <img src="advengers.jpg" alt="Film">
-      <h3>Qasoskorlar 5</h3>
-      <button onclick="openMovie('http://asilmedia.org/8978-qasoskorlar-4-intiho-uzbek-tilida-2019-hd-ozbek-tarjima-tas-ix-skachat.html')">Ko‘rish</button>
+
+  <!-- Result -->
+  <div id="result" class="mt-10 w-full max-w-xl hidden">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 text-center">
+      <p id="uzWord" class="text-3xl font-bold text-gray-800 mb-4"></p>
+      <p id="enWord" class="text-4xl font-extrabold text-blue-600"></p>
     </div>
   </div>
 
-  <!-- Modal oynasi -->
-  <div class="modal" id="movieModal">
-    <div class="modal-content">
-      <span class="close" onclick="closeMovie()">&times;</span>
-      <iframe id="movieFrame" src="" frameborder="0" allowfullscreen></iframe>
-    </div>
-  </div>
-
+  <!-- Dictionary va script -->
   <script>
-    const searchInput = document.getElementById("searchInput");
-    const moviesList = document.getElementById("moviesList");
-    const movies = moviesList.getElementsByClassName("movie");
-    const modal = document.getElementById("movieModal");
-    const movieFrame = document.getElementById("movieFrame");
+    const dictionary = {
+    "salom": "hello",
+    "kitob": "book",
+    "kompyuter": "computer",
+    "dunyo": "world",
+    "o'qituvchi": "teacher",
+    "salom": "hello",
+    "xayr": "goodbye",
+    "iltimos": "please",
+    "rahmat": "thank you",
+    "kechirasiz": "sorry",
+    "ha": "yes",
+    "yo'q": "no",
+    "kim": "who",
+    "nima": "what",
+    "qayerda": "where",
+    "qachon": "when",
+    "nega": "why",
+    "qanday": "how",
+    "men": "I",
+    "sen": "you",
+    "u": "he/she",
+    "biz": "we",
+    "siz": "you (formal)",
+    "ular": "they",
+    "ota": "father",
+    "ona": "mother",
+    "aka": "older brother",
+    "uka": "younger brother",
+    "opa": "older sister",
+    "singil": "younger sister",
+    "bola": "child",
+    "do'st": "friend",
+    "odam": "person",
+    "uy": "house",
+    "xona": "room",
+    "oshxona": "kitchen",
+    "yotoqxona": "bedroom",
+    "hammom": "bathroom",
+    "bog'": "garden",
+    "daraxt": "tree",
+    "gul": "flower",
+    "meva": "fruit",
+    "sabzavot": "vegetable",
+    "non": "bread",
+    "sut": "milk",
+    "suv": "water",
+    "choy": "tea",
+    "qahva": "coffee",
+    "go'sht": "meat",
+    "tuxum": "egg",
+    "yog'": "oil",
+    "shakar": "sugar",
+    "tuz": "salt",
+    "olma": "apple",
+    "banan": "banana",
+    "apelsin": "orange",
+    "uzum": "grape",
+    "nok": "pear",
+    "gilos": "cherry",
+    "shaftoli": "peach",
+    "tarvuz": "watermelon",
+    "qovun": "melon",
+    "sabzi": "carrot",
+    "piyoz": "onion",
+    "kartoshka": "potato",
+    "bodring": "cucumber",
+    "pomidor": "tomato",
+    "karam": "cabbage",
+    "mashina": "car",
+    "avtobus": "bus",
+    "poyezd": "train",
+    "samolyot": "airplane",
+    "velosiped": "bicycle",
+    "yo'l": "road",
+    "ko'cha": "street",
+    "shahar": "city",
+    "qishloq": "village",
+    "maktab": "school",
+    "universitet": "university",
+    "o'qituvchi": "teacher",
+    "o'quvchi": "student",
+    "kitob": "book",
+    "qalam": "pen",
+    "daftar": "notebook",
+    "stol": "table",
+    "stul": "chair",
+    "eshik": "door",
+    "deraza": "window",
+    "devor": "wall",
+    "pol": "floor",
+    "shift": "ceiling",
+    "telefon": "phone",
+    "kompyuter": "computer",
+    "televizor": "television",
+    "radio": "radio",
+    "soat": "clock",
+    "pul": "money",
+    "bozor": "market",
+    "dokon": "shop",
+    "ish": "work",
+    "kasb": "profession",
+    "o'yin": "game",
+    "musiqa": "music",
+    "kino": "movie",
+    "mushuk": "cat",
+    "it": "dog",
+    "qush": "bird",
+    "tovuq": "chicken",
+    "xo'roz": "rooster",
+    "o'rdak": "duck",
+    "g'oz": "goose",
+    "baliq": "fish",
+    "ot": "horse",
+    "sigir": "cow",
+    "qo'y": "sheep",
+    "echki": "goat",
+    "cho'chqa": "pig",
+    "ilon": "snake",
+    "qurbaqa": "frog",
+    "kapalak": "butterfly",
+    "ari": "bee",
+    "chumoli": "ant",
+    "burgut": "eagle",
+    "lochin": "falcon",
+    "tovus": "peacock",
+    "maymun": "monkey",
+    "fil": "elephant",
+    "sher": "lion",
+    "yo'lbars": "tiger",
+    "bo'ri": "wolf",
+    "ayiq": "bear",
+    "tulki": "fox",
+    "quyon": "rabbit",
+    "sichqon": "mouse",
+    "kalamush": "rat",
+    "timsah": "crocodile",
+    "jirafa": "giraffe",
+    "zebra": "zebra",
+    "bug'u": "deer",
+    "qoplon": "leopard",
+    "pantera": "panther",
+    "pingvin": "penguin",
+    "delfin": "dolphin",
+    "akula": "shark",
+    "kit": "whale",
+    "meduza": "jellyfish",
+    "qobiq": "shell",
+    "o'rgimchak": "spider",
+    "chayon": "scorpion",
+    "qaldirg'och": "swallow",
+    "qarg'a": "crow",
+    "kaptar": "pigeon",
+    "to'tiqush": "parrot",
+    "tabiat": "nature",
+    "yulduz": "star",
+    "oy": "moon",
+    "quyosh": "sun",
+    "bulut": "cloud",
+    "yomg'ir": "rain",
+    "qor": "snow",
+    "shamol": "wind",
+    "chaqmoq": "lightning",
+    "daryo": "river",
+    "ko'l": "lake",
+    "dengiz": "sea",
+    "okean": "ocean",
+    "tog'": "mountain",
+    "cho'l": "desert",
+    "o'rmon": "forest",
+    "dala": "field",
+    "tepalyk": "hill",
+    "yer": "earth",
+    "qum": "sand",
+    "tosh": "stone",
+    "g'isht": "brick",
+    "temir": "iron",
+    "oltin": "gold",
+    "kumush": "silver",
+    "mis": "copper",
+    "qora": "black",
+    "oq": "white",
+    "qizil": "red",
+    "yashil": "green",
+    "ko'k": "blue",
+    "sariq": "yellow",
+    "pushti": "pink",
+    "to'q sariq": "orange",
+    "jigarrang": "brown",
+    "kulrang": "gray",
+    "havorang": "sky blue",
+    "och yashil": "light green",
+    "to'q ko'k": "dark blue",
+    "oltin rang": "golden",
+    "kumush rang": "silver color",
+    "binafsha": "purple",
+    "bej": "beige",
+    "kiyim": "clothes",
+    "ko'ylak": "shirt",
+    "shim": "trousers",
+    "kostyum": "suit",
+    "yubka": "skirt",
+    "ko'ylak (ayol)": "dress",
+    "poyabzal": "shoes",
+    "krossovka": "sneakers",
+    "etik": "boots",
+    "tufli": "heels",
+    "paypoq": "socks",
+    "qo'lqop": "gloves",
+    "sharf": "scarf",
+    "shapka": "hat",
+    "kepka": "cap",
+    "kurtka": "jacket",
+    "palto": "coat",
+    "yoqa": "collar",
+    "belbog'": "belt",
+    "soat (bilaguzuk)": "watch",
+    "ko'zoynak": "glasses",
+    "quyosh ko'zoynagi": "sunglasses",
+    "sumka": "bag",
+    "ryukzak": "backpack",
+    "cho'ntak": "pocket",
+    "zanjir": "chain",
+    "uzuk": "ring",
+    "sirg'a": "earring",
+    "bilaguzuk": "bracelet",
+    "marjon": "necklace",
+    "uy": "home",
+    "xonadon": "apartment",
+    "mehmonxona": "living room",
+    "oshxona": "kitchen",
+    "yotoqxona": "bedroom",
+    "hammom": "bathroom",
+    "yo'lak": "corridor",
+    "garaj": "garage",
+    "balkon": "balcony",
+    "tom": "roof",
+    "parda": "curtain",
+    "gilam": "carpet",
+    "divan": "sofa",
+    "kreslo": "armchair",
+    "yotoq": "bed",
+    "yostiq": "pillow",
+    "ko'rpa": "blanket",
+    "choyshab": "bed sheet",
+    "shkaf": "wardrobe",
+    "javon": "shelf",
+    "idish-tovoq": "dishes",
+    "tarelka": "plate",
+    "kosacha": "bowl",
+    "stakan": "glass",
+    "chashka": "cup",
+    "choynak": "teapot",
+    "qozon": "pot",
+    "tovuq": "pan",
+    "qoshiq": "spoon",
+    "vilka": "fork",
+    "pichoq": "knife",
+    "qopqoq": "lid",
+    "idish": "dish",
+    "butilka": "bottle",
+    "quti": "box",
+    "idish yuvish mashinasi": "dishwasher",
+    "muzlatkich": "fridge",
+    "gaz plitasi": "stove",
+    "mikroto'lqinli pech": "microwave",
+    "pech": "oven",
+    "changyutgich": "vacuum cleaner",
+    "kir yuvish mashinasi": "washing machine",
+    "temir": "iron (for clothes)",
+    "fen": "hair dryer",
+    "oyna": "mirror",
+    "lampochka": "light bulb",
+    "fonar": "flashlight",
+    "batareya": "battery",
+    "rozetka": "socket",
+    "vilka (elektr)": "plug",
+    "suv isitgich": "water heater",
+    "ventilyator": "fan",
+    "konditsioner": "air conditioner",
+    "eshik qo'ng'irog'i": "doorbell",
+    "kalit": "key",
+    "qulf": "lock",
+    "pochta qutisi": "mailbox",
+    "supurgi": "broom",
+    "mo'ralgich": "mop",
+    "chelak": "bucket",
+    "choyshab": "sheet",
+    "xalta": "bag",
+    "paxta": "cotton",
+    "ip": "thread",
+    "igna": "needle",
+    "qaychi": "scissors",
+    "sudya": "judge",
+    "militsiya": "police",
+    "askari": "soldier",
+    "hukumat": "government",
+    "qonun": "law",
+    "qamoqxona": "prison",
+    "jinoyat": "crime",
+    "sud": "court",
+    "huquq": "right",
+    "majlis": "meeting",
+    "saylov": "election",
+    "partiya": "party",
+    "davlat": "state",
+    "prezident": "president",
+    "vazir": "minister",
+    "hokim": "governor",
+    "elchi": "ambassador",
+    "xalq": "people",
+    "millat": "nation",
+    "bayroq": "flag",
+    "madhiya": "anthem",
+    "pul": "money",
+    "bank": "bank",
+    "hisob": "account",
+    "karta": "card",
+    "savdo": "trade",
+    "bozor": "market",
+    "narx": "price",
+    "maosh": "salary",
+    "boy": "rich",
+    "kambag'al": "poor",
+    "ishsizlik": "unemployment",
+    "soliq": "tax",
+    "qarz": "debt",
+    "foyda": "profit",
+    "zarar": "loss",
+    "mijoz": "customer",
+    "sotuvchi": "seller",
+    "ishlab chiqarish": "production",
+    "zavod": "factory",
+    "korxona": "enterprise",
+    "kompaniya": "company",
+    "ishchi": "worker",
+    "mehnat": "labor",
+    "ish": "work",
+    "kasb": "profession",
+    "shifokor": "doctor",
+    "haydovchi": "driver",
+    "o'qituvchi": "teacher",
+    "talaba": "student",
+    "quruvchi": "builder",
+    "dizayner": "designer",
+    "muhandis": "engineer",
+    "dasturchi": "programmer",
+    "qoshiqchi": "singer",
+    "raqsbop": "dancer",
+    "yozuvchi": "writer",
+    "shoir": "poet",
+    "rassom": "painter",
+    "haykaltarosh": "sculptor",
+    "aktyor": "actor",
+    "rejissyor": "director",
+    "muxbir": "reporter",
+    "jurnalist": "journalist",
+    "fotograf": "photographer",
+    "sayyoh": "traveler",
+    "sportchi": "athlete",
+    "futbolchi": "football player",
+    "bokschi": "boxer",
+    "kurashchi": "wrestler",
+    "suzuvchi": "swimmer",
+    "yuguruvchi": "runner",
+    "tennischi": "tennis player",
+    "shaxmatchi": "chess player",
+    "hakim": "judge",
+    "murabbiy": "coach",
+    "musobaqa": "competition",
+    "chempionat": "championship",
+    "g'olib": "winner",
+    "mag'lub": "loser",
+    "rekord": "record",
+    "mukofot": "award",
+    "medal": "medal",
+    "kubok": "cup",
+    "olimpiada": "olympics",
+    "sport zal": "gym",
+    "stadion": "stadium",
+    "maydon": "field",
+    "o'yin": "game",
+    "dam olish": "rest",
+    "sayohat": "travel",
+    "dengiz": "sea",
+    "okean": "ocean",
+    "oroll": "island",
+    "cho'l": "desert",
+    "vodiy": "valley",
+    "sharshara": "waterfall",
+    "tabiat": "nature",
+    "hayvon": "animal",
+    "qush": "bird",
+    "baliq": "fish",
+    "mushuk": "cat",
+    "it": "dog",
+    "ot": "horse",
+    "sigir": "cow",
+    "qo'y": "sheep",
+    "echki": "goat",
+    "tovuq": "chicken",
+    "xo'roz": "rooster",
+    "o'rdak": "duck",
+    "quyon": "rabbit",
+    "bo'ri": "wolf",
+    "ayiq": "bear",
+    "yo'lbars": "tiger",
+    "sher": "lion",
+    "maymun": "monkey",
+    "ilon": "snake",
+    "toshbaqa": "turtle",
+    "fil": "elephant",
+    "jirafa": "giraffe",
+    "kenguru": "kangaroo",
+    "quyoncha": "bunny",
+    "ari": "bee",
+    "chumoli": "ant",
+    "kapalak": "butterfly",
+    "chumchuq": "sparrow",
+    "burgut": "eagle",
+    "qaldirg'och": "swallow",
+    "to'ti": "parrot",
+    "qarg'a": "crow",
+    "burgutqush": "falcon",
+    "tuya": "camel",
+    "yovvoyi": "wild",
+    "uy hayvoni": "pet",
+    "ferma": "farm",
+    "ov": "hunt",
+    "o'rmon": "forest",
+    "daraxt": "tree",
+    "barg": "leaf",
+    "giyoh": "grass",
+    "gul": "flower",
+    "meva": "fruit",
+    "sabzavot": "vegetable",
+    "olma": "apple",
+    "banan": "banana",
+    "nok": "pear",
+    "shaftoli": "peach",
+    "o'rik": "apricot",
+    "gilos": "cherry",
+    "olcha": "sour cherry",
+    "uzum": "grape",
+    "tarvuz": "watermelon",
+    "qovun": "melon",
+    "anor": "pomegranate",
+    "limon": "lemon",
+    "apelsin": "orange",
+    "mandarin": "tangerine",
+    "kivi": "kiwi",
+    "anjir": "fig",
+    "xurmo": "date",
+    "kartoshka": "potato",
+    "sabzi": "carrot",
+    "piyoz": "onion",
+    "sarimsoq": "garlic",
+    "pomidor": "tomato",
+    "bodring": "cucumber",
+    "qalampir": "pepper",
+    "karam": "cabbage",
+    "lavlagi": "beet",
+    "sholg'om": "turnip",
+    "no'xat": "pea",
+    "loviya": "bean",
+    "makkajo'xori": "corn",
+    "guruch": "rice",
+    "un": "flour",
+    "tuxum": "egg",
+    "sut": "milk",
+    "qaymoq": "cream",
+    "pishloq": "cheese",
+    "tvorog": "cottage cheese",
+    "yog'": "oil",
+    "asal": "honey",
+    "murabbo": "jam",
+    "tuz": "salt",
+    "shakar": "sugar",
+    "qalampir kukuni": "pepper powder",
+    "ziravor": "spice",
+    "sho'rva": "soup",
+    "palov": "pilaf",
+    "kabob": "kebab",
+    "somsa": "samosa",
+    "chuchvara": "dumpling",
+    "osh": "rice dish",
+    "lag'mon": "noodles",
+    "shashlik": "shashlik",
+    "salat": "salad",
+    "non": "bread",
+    "kulcha": "flatbread",
+    "pitsa": "pizza",
+    "burger": "burger",
+    "hot-dog": "hot dog",
+    "sandvich": "sandwich",
+    "shirinlik": "dessert",
+    "shokolad": "chocolate",
+    "pechenye": "cookie",
+    "tort": "cake",
+    "muzqaymoq": "ice cream",
+    "konfet": "candy",
+    "ichimlik": "drink",
+    "suv": "water",
+    "choy": "tea",
+    "qahva": "coffee",
+    "sharbat": "juice",
+    "limonad": "lemonade",
+    "gazlangan suv": "soda",
+    "kokteyl": "cocktail",
+    "oshxona": "kitchen",
+    "idish": "dish",
+    "likopcha": "plate",
+    "kosacha": "bowl",
+    "stakan": "glass",
+    "choynak": "teapot",
+    "chashka": "cup",
+    "qoshiq": "spoon",
+    "vilka": "fork",
+    "pichoq": "knife",
+    "kastrulka": "pan",
+    "tovoq": "frying pan",
+    "pechka": "stove",
+    "muzlatkich": "fridge",
+    "pech": "oven",
+    "mikroto'lqinli pech": "microwave",
+    "idish yuvish mashinasi": "dishwasher",
+    "sochiq": "towel",
+    "stol": "table",
+    "stul": "chair",
+    "divan": "sofa",
+    "kreslo": "armchair",
+    "karavot": "bed",
+    "to'shak": "mattress",
+    "yostiq": "pillow",
+    "ko'rpa": "blanket",
+    "choyshab": "bedsheet",
+    "gilam": "carpet",
+    "parda": "curtain",
+    "lampochka": "bulb",
+    "fonar": "lamp",
+    "shifoner": "wardrobe",
+    "javon": "shelf",
+    "oyna": "mirror",
+    "eshik": "door",
+    "deraza": "window",
+    "devor": "wall",
+    "pol": "floor",
+    "shift": "ceiling",
+    "tom": "roof",
+    "uy": "house",
+    "kvartira": "apartment",
+    "xona": "room",
+    "yotoqxona": "bedroom",
+    "mehmonxona": "living room",
+    "oshxona": "kitchen",
+    "hammom": "bathroom",
+    "koridor": "corridor",
+    "balkon": "balcony",
+    "hovli": "yard",
+    "garaj": "garage",
+    "bog'": "garden",
+    "daraxt": "tree",
+    "gul": "flower",
+    "maysazor": "lawn",
+    "hovuz": "pool",
+    "panjara": "fence",
+    "yo'l": "road",
+    "ko'cha": "street",
+    "maydon": "square",
+    "ko'prik": "bridge",
+    "tunnel": "tunnel",
+    "chorraha": "crossroad",
+    "svetofor": "traffic light",
+    "belgi": "sign",
+    "avtobus": "bus",
+    "tramvay": "tram",
+    "trolleybus": "trolleybus",
+    "metro": "subway",
+    "takso": "taxi",
+    "mashina": "car",
+    "mototsikl": "motorcycle",
+    "velosiped": "bicycle",
+    "poyezd": "train",
+    "samolyot": "airplane",
+    "kema": "ship",
+    "qayiq": "boat",
+    "aeroport": "airport",
+    "stansiya": "station",
+    "vokzal": "railway station",
+    "bekat": "stop",
+    "chipta": "ticket",
+    "yo'lovchi": "passenger",
+    "haydovchi": "driver",
+    "uchuvchi": "pilot",
+    "styuardessa": "stewardess",
+    "yo'nalish": "route",
+    "xarita": "map",
+    "manzil": "destination",
+    "sayohat": "travel",
+    "sayyoh": "tourist",
+    "mehmonxona": "hotel",
+    "mehmon": "guest",
+    "xonadon": "apartment",
+    "bron qilish": "booking",
+    "qabulxona": "reception",
+    "kalit": "key",
+    "xizmat": "service",
+    "restoran": "restaurant",
+    "kafe": "cafe",
+    "oshpaz": "chef",
+    "ofitsiant": "waiter",
+    "menyu": "menu",
+    "buyurtma": "order",
+    "hisob": "bill",
+    "pul": "money",
+    "naqd": "cash",
+    "karta": "card",
+    "bozor": "market",
+    "magazin": "shop",
+    "do'kon": "store",
+    "supermarket": "supermarket",
+    "savdo markazi": "mall",
+    "apteka": "pharmacy",
+    "dorixona": "drugstore",
+    "dori": "medicine",
+    "shifokor": "doctor",
+    "hamshira": "nurse",
+    "kasal": "sick",
+    "sog'": "healthy",
+    "kasalxona": "hospital",
+    "tez yordam": "ambulance",
+    "jarrohlik": "surgery",
+    "tish shifokori": "dentist",
+    "ko'z shifokori": "oculist",
+    "quloq burun tomoq": "ENT",
+    "dorilar": "medicines",
+    "retsept": "prescription",
+    "vaksina": "vaccine",
+    "harorat": "temperature",
+    "isitma": "fever",
+    "yo'tal": "cough",
+    "shamollash": "cold",
+    "gripp": "flu",
+    "og'riq": "pain",
+    "bosh og'rig'i": "headache",
+    "qorin og'rig'i": "stomachache",
+    "tomoq og'rig'i": "sore throat",
+    "ko'z": "eye",
+    "quloq": "ear",
+    "burun": "nose",
+    "og'iz": "mouth",
+    "tish": "tooth",
+    "til": "tongue",
+    "yurak": "heart",
+    "qon": "blood",
+    "o'pka": "lung",
+    "jigar": "liver",
+    "buyrak": "kidney",
+    "oshqozon": "stomach",
+    "miya": "brain",
+    "suyak": "bone",
+    "muskul": "muscle",
+    "teri": "skin",
+    "soch": "hair",
+    "tirnoq": "nail",
+    "qo'l": "hand",
+    "oyoql": "leg",
+    "barmoq": "finger",
+    "tizza": "knee",
+    "bo'yin": "neck",
+    "yelk": "shoulder",
+    "ko'krak": "chest",
+    "bel": "waist",
+    "orqa": "back",
+    "qorin": "belly",
+    "oyoq kafti": "foot",
+    "qo'l kafti": "palm",
+    "yuz": "face",
+    "lab": "lip",
+    "qosh": "eyebrow",
+    "kiprik": "eyelash",
+    "yuqori": "upper",
+    "pastki": "lower",
+    "chap": "left",
+    "o'ng": "right",
+    "yuqorida": "above",
+    "pastda": "below",
+    "oldinda": "in front",
+    "orqada": "behind",
+    "ichida": "inside",
+    "tashqarida": "outside",
+    "ustida": "on",
+    "ostida": "under",
+    "yaqin": "near",
+    "uzoq": "far",
+    "yuqori": "high",
+    "past": "low",
+    "uzun": "long",
+    "qisqa": "short",
+    "tor": "narrow",
+    "keng": "wide",
+    "qalin": "thick",
+    "ingichka": "thin",
+    "og'ir": "heavy",
+    "yengil": "light",
+    "qattiq": "hard",
+    "yumshoq": "soft",
+    "to'g'ri": "straight",
+    "egri": "curved",
+    "dumaloq": "round",
+    "to'rtburchak": "square",
+    "uchburchak": "triangle",
+    "rang": "color",
+    "oq": "white",
+    "qora": "black",
+    "qizil": "red",
+    "yashil": "green",
+    "ko'k": "blue",
+    "sariq": "yellow",
+    "pushti": "pink",
+    "kulrang": "gray",
+    "jigarrang": "brown",
+    "to'q ko'k": "navy blue",
+    "to'q yashil": "dark green",
+    "yorqin": "bright",
+    "och": "light",
+    "son": "number",
+    "bir": "one",
+    "ikki": "two",
+    "uch": "three",
+    "to'rt": "four",
+    "besh": "five",
+    "olti": "six",
+    "yetti": "seven",
+    "sakkiz": "eight",
+    "to'qqiz": "nine",
+    "o'n": "ten",
+    "yigirma": "twenty",
+    "o'ttiz": "thirty",
+    "qirq": "forty",
+    "ellik": "fifty",
+    "oltmish": "sixty",
+    "yetmish": "seventy",
+    "sakson": "eighty",
+    "to'qson": "ninety",
+    "yuz": "hundred",
+    "ming": "thousand",
+    "million": "million",
+    "milliard": "billion",
+    "nol": "zero",
+    "birinchi": "first",
+    "ikkinchi": "second",
+    "uchinchi": "third",
+    "to'rtinchi": "fourth",
+    "beshinchi": "fifth",
+    "soat": "clock",
+    "daqiqa": "minute",
+    "sekund": "second",
+    "kun": "day",
+    "hafta": "week",
+    "oy": "month",
+    "yil": "year",
+    "asr": "century",
+    "tong": "morning",
+    "tush": "noon",
+    "kechqurun": "evening",
+    "tun": "night",
+    "bugun": "today",
+    "kecha": "yesterday",
+    "ertaga": "tomorrow",
+    "hozir": "now",
+    "keyin": "later",
+    "oldin": "before",
+    "keyinchalik": "after",
+    "boshlanish": "beginning",
+    "oxir": "end",
+    "davomida": "during",
+    "bahor": "spring",
+    "yoz": "summer",
+    "kuz": "autumn",
+    "qish": "winter",
+    "ob-havo": "weather",
+    "quyoshli": "sunny",
+    "bulutli": "cloudy",
+    "yomg'irli": "rainy",
+    "qorli": "snowy",
+    "shamol": "wind",
+    "chaqmoq": "lightning",
+    "momaqaldiroq": "thunder",
+    "sovuqlik": "coldness",
+    "issiq": "heat",
+    "muz": "ice",
+    "tuman": "fog",
+    "nam": "wet",
+    "quruq": "dry",
+    "yozuv": "writing",
+    "kitob": "book",
+    "daftar": "notebook",
+    "qalam": "pen",
+    "ruchka": "ballpoint pen",
+    "marker": "marker",
+    "taxta": "board",
+    "doska": "chalkboard",
+    "sinf": "classroom",
+    "maktab": "school",
+    "talaba": "student",
+    "o'qituvchi": "teacher",
+    "imtihon": "exam",
+    "baholash": "grading",
+    "savol": "question",
+    "javob": "answer",
+    "mashq": "exercise",
+    "uy vazifa": "homework",
+    "fan": "subject",
+    "matematika": "mathematics",
+    "adabiyot": "literature",
+    "tarix": "history",
+    "geografiya": "geography",
+    "kimyo": "chemistry",
+    "fizika": "physics",
+    "biologiya": "biology",
+    "informatika": "informatics",
+    "san'at": "art",
+    "musiqa": "music",
+    "jismoniy tarbiya": "physical education",
+    "kutubxona": "library",
+    "kitobxona": "reading room",
+    "dars": "lesson",
+    "tanaffus": "break",
+    "direktor": "principal",
+    "sinfdosh": "classmate",
+    "kursdosh": "groupmate",
+    "topshiriq": "task",
+    "bilim": "knowledge",
+    "ilm": "science",
+    "tadqiqot": "research",
+    "kashfiyot": "discovery",
+    "tajriba": "experiment",
+    "formulа": "formula",
+    "hisob": "calculation",
+    "natija": "result",
+    "xulosa": "conclusion",
+    "ma'lumot": "information",
+    "matn": "text",
+    "gap": "sentence",
+    "so'z": "word",
+    "harf": "letter",
+    "raqam": "number",
+    "belgi": "sign",
+    "yozmoq": "to write",
+    "o'qimoq": "to read",
+    "o'rganmoq": "to learn",
+    "yodlamoq": "to memorize",
+    "tushunmoq": "to understand",
+    "savol bermoq": "to ask",
+    "javob bermoq": "to answer",
+    "o'qimoq (dars)": "to study",
+    "bitirmoq": "to graduate",
+    "diplom": "diploma",
+    "sertifikat": "certificate",
+    "reja": "plan",
+    "maqsad": "goal",
+    "g'oya": "idea",
+    "loyiha": "project",
+    "ishlab chiqish": "development",
+    "ma'ruza": "lecture",
+    "seminar": "seminar",
+    "konferensiya": "conference",
+    "kitob do'koni": "bookstore",
+    "yozuvchi": "writer",
+    "shoir": "poet",
+    "qahramon": "hero",
+    "ertak": "fairy tale",
+    "she'r": "poem",
+    "roman": "novel",
+    "hikoya": "story",
+    "maqola": "article",
+    "gazeta": "newspaper",
+    "jurnal": "magazine",
+    "xabar": "news",
+    "axborot": "information",
+    "televizor": "television",
+    "radio": "radio",
+    "internet": "internet",
+    "kompyuter": "computer",
+    "noutbuk": "laptop",
+    "planshet": "tablet",
+    "telefon": "phone",
+    "smartfon": "smartphone",
+    "kamerа": "camera",
+    "video": "video",
+    "rasm": "picture",
+    "foto": "photo",
+    "film": "movie",
+    "multfilm": "cartoon",
+    "teatr": "theatre",
+    "kino": "cinema",
+    "musiqa": "music",
+    "qo'shiq": "song",
+    "konsert": "concert",
+    "spektakl": "performance",
+    "ijro": "performance",
+    "san'atkor": "artist",
+    "aktyor": "actor",
+    "aktyor ayol": "actress",
+    "rejissyor": "director",
+    "mashhur": "famous",
+    "sahnа": "stage",
+    "madaniyat": "culture",
+    "an'ana": "tradition",
+    "urф-odat": "custom",
+    "bayram": "holiday",
+    "to'y": "wedding",
+    "marosim": "ceremony",
+    "mehmon": "guest",
+    "mehmondorchilik": "hospitality",
+    "sovg'a": "gift",
+    "tabrik": "congratulation",
+    "qo'shni": "neighbor",
+    "do'st": "friend",
+    "tanış": "acquaintance",
+    "oila": "family",
+    "ota": "father",
+    "ona": "mother",
+    "aka": "brother",
+    "uka": "younger brother",
+    "opa": "sister",
+    "singil": "younger sister",
+    "bola": "child",
+    "chaqaloq": "baby",
+    "erkak": "man",
+    "ayol": "woman",
+    "odam": "person",
+    "inson": "human",
+    "do'stlik": "friendship",
+    "sevgi": "love",
+    "baxt": "happiness",
+    "quvonch": "joy",
+    "xursandchilik": "gladness",
+    "tabassum": "smile",
+    "kulgu": "laughter",
+    "yig'i": "crying",
+    "g'am": "sadness",
+  };
 
-    // Qidiruv
-    searchInput.addEventListener("keyup", function() {
-      let filter = searchInput.value.toLowerCase();
-      for (let i = 0; i < movies.length; i++) {
-        let title = movies[i].getElementsByTagName("h3")[0];
-        if (title.innerText.toLowerCase().indexOf(filter) > -1) {
-          movies[i].style.display = "";
-        } else {
-          movies[i].style.display = "none";
-        }
+    function searchWord() {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      const resultBox = document.getElementById("result");
+      const uzWord = document.getElementById("uzWord");
+      const enWord = document.getElementById("enWord");
+
+      if (dictionary[input]) {
+        uzWord.textContent = input;
+        enWord.textContent = dictionary[input];
+      } else {
+        uzWord.textContent = input;
+        enWord.textContent = "❌ Topilmadi";
       }
-    });
 
-    // Kino oynasini ochish
-    function openMovie(url) {
-      modal.style.display = "flex";
-      movieFrame.src = url;
-    }
-
-    // Kino oynasini yopish
-    function closeMovie() {
-      modal.style.display = "none";
-      movieFrame.src = "";
-    }
-
-    // Modalni tashqariga bosganda yopish
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        closeMovie();
-      }
+      resultBox.classList.remove("hidden");
     }
   </script>
 </body>
-
 </html>
-
-
-
