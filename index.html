@@ -126,57 +126,33 @@
   </div>
 
 <script>
-/* ====== yordamchi: localStorage users struktura ======
-users = [
-  { username: "...", password: "...", avatar: "data:image/..." }
-]
-chatHistory = [ { user: "name", text: "..." }, ... ]
-==================================================== */
+/* ====== LocalStorage struktura ======
+users = [ { username: "...", password: "...", avatar: "data:image/..." } ]
+chatHistory = [ { user: "...", text: "...", time: 123 } ]
+======================================= */
 
 let currentUser = null;
 
-/* --- MODAL ochish/close funksiyalari --- */
+/* --- Modal funksiyalari --- */
 function openSignup(){ document.getElementById('signupModal').classList.remove('hidden'); }
-function closeSignup(){ 
-  document.getElementById('signupModal').classList.add('hidden');
-  document.getElementById('signupName').value = "";
-  document.getElementById('signupPass').value = "";
-  document.getElementById('signupAvatar').value = "";
-}
+function closeSignup(){ document.getElementById('signupModal').classList.add('hidden'); }
 function openLogin(){ document.getElementById('loginModal').classList.remove('hidden'); }
-function closeLogin(){ 
-  document.getElementById('loginModal').classList.add('hidden');
-  document.getElementById('loginName').value = "";
-  document.getElementById('loginPass').value = "";
-}
-function openProfile(){ 
-  if(!currentUser) return;
-  document.getElementById('profileModal').classList.remove('hidden');
-  populateProfileModal();
-}
-function closeProfile(){
-  document.getElementById('profileModal').classList.add('hidden');
-  document.getElementById('currentPass').value = "";
-  document.getElementById('newPass').value = "";
-  document.getElementById('profileAvatarInput').value = "";
-}
+function closeLogin(){ document.getElementById('loginModal').classList.add('hidden'); }
+function openProfile(){ if(!currentUser) return; document.getElementById('profileModal').classList.remove('hidden'); populateProfileModal(); }
+function closeProfile(){ document.getElementById('profileModal').classList.add('hidden'); }
 
-/* --- RO'YXATDAN O'TISH --- */
+/* --- Ro‘yxatdan o‘tish --- */
 function signup(){
   const name = document.getElementById('signupName').value.trim();
   const pass = document.getElementById('signupPass').value.trim();
   const avatarFile = document.getElementById('signupAvatar').files[0];
-
   if(!name || !pass){ alert('Ism va parol kiriting!'); return; }
-
   let users = JSON.parse(localStorage.getItem('users')) || [];
   if(users.find(u => u.username === name)){ alert('Bu ism allaqachon ro‘yxatdan o‘tgan!'); return; }
-
   if(avatarFile){
     const reader = new FileReader();
     reader.onload = function(e){
-      const avatarData = e.target.result;
-      users.push({ username: name, password: pass, avatar: avatarData });
+      users.push({ username: name, password: pass, avatar: e.target.result });
       localStorage.setItem('users', JSON.stringify(users));
       alert('Muvaffaqiyatli ro‘yxatdan o‘tdingiz!');
       closeSignup();
@@ -190,232 +166,116 @@ function signup(){
   }
 }
 
-/* --- KIRISH --- */
+/* --- Kirish --- */
 function login(){
   const name = document.getElementById('loginName').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
   let users = JSON.parse(localStorage.getItem('users')) || [];
   const found = users.find(u => u.username === name && u.password === pass);
-
   if(found){
     currentUser = name;
-    document.getElementById('loginModal').classList.add('hidden');
+    closeLogin();
     document.getElementById('chatScreen').classList.remove('hidden');
     loadMessages();
     loadUsers();
-    document.getElementById('loginName').value = "";
-    document.getElementById('loginPass').value = "";
-  } else {
-    alert('Ism yoki parol noto‘g‘ri!');
-  }
+  } else { alert('Ism yoki parol noto‘g‘ri!'); }
 }
 
-/* --- CHAT yopish --- */
-function closeChat(){
-  document.getElementById('chatScreen').classList.add('hidden');
-  currentUser = null;
-  // login inputlarini tozalash
-  document.getElementById('loginName').value = "";
-  document.getElementById('loginPass').value = "";
-}
+/* --- Chiqish --- */
+function closeChat(){ document.getElementById('chatScreen').classList.add('hidden'); currentUser = null; }
 
 /* --- Xabar yuborish --- */
 function sendMessage(){
   const input = document.getElementById('messageInput');
-  const msg = input.value.trim();
-  if(!msg || !currentUser) return;
-  const newMsg = { user: currentUser, text: msg, time: Date.now() };
-  saveMessage(newMsg);
-  addMessageToScreen(newMsg);
-  input.value = "";
-}
-
-/* --- DOMda xabar ko'rsatish --- */
-function addMessageToScreen(message){
-  const messages = document.getElementById('messages');
-  const wrapper = document.createElement('div');
-  wrapper.className = 'flex items-end ' + (message.user === currentUser ? 'justify-end' : 'justify-start');
-
-  const bubble = document.createElement('div');
-  bubble.className = 'px-4 py-2 rounded-2xl max-w-md shadow-md';
-  bubble.style.background = message.user === currentUser ? '#6d28d9' : '#374151';
-  bubble.style.color = 'white';
-
-  // agar boshqa foydalanuvchi bo'lsa, nom va avatar ko'rsat
-  if(message.user !== currentUser){
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const u = users.find(x => x.username === message.user) || {};
-    const left = document.createElement('div');
-    left.className = 'flex items-center gap-3';
-    const img = document.createElement('img');
-    img.className = 'w-8 h-8 rounded-full object-cover';
-    img.src = u.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"></svg>';
-    img.alt = message.user;
-    const info = document.createElement('div');
-    info.className = 'text-sm';
-    info.innerHTML = `<strong>${escapeHtml(message.user)}</strong><div class="text-xs text-gray-200">${escapeHtml(message.text)}</div>`;
-    left.appendChild(img);
-    left.appendChild(info);
-    wrapper.appendChild(left);
-  } else {
-    bubble.innerHTML = `<div class="text-sm">${escapeHtml(message.text)}</div>`;
-    wrapper.appendChild(bubble);
-    messages.appendChild(wrapper);
-    messages.scrollTop = messages.scrollHeight;
-    return;
-  }
-
-  messages.appendChild(wrapper);
-  messages.lastChild.querySelector('div div').appendChild(document.createElement('div')); // keep spacing
-  messages.scrollTop = messages.scrollHeight;
-}
-
-/* --- localStorage bilan xabarlarni saqlash --- */
-function saveMessage(message){
+  const text = input.value.trim();
+  if(!text || !currentUser) return;
+  const newMsg = { user: currentUser, text, time: Date.now() };
   let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
-  chatHistory.push(message);
+  chatHistory.push(newMsg);
   localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  input.value = "";
+  loadMessages();
 }
 
-/* --- xabarlarni yuklash --- */
+/* --- Xabarlarni yuklash --- */
 function loadMessages(){
   const messagesArr = JSON.parse(localStorage.getItem('chatHistory')) || [];
   const messages = document.getElementById('messages');
   messages.innerHTML = '';
-  for(const m of messagesArr){
-    // soddalashtirilgan ko'rsatish: agar author currentUser bo'lsa, o'ngga, aks holda chapga
-    const wrapper = document.createElement('div');
-    wrapper.className = 'flex items-end ' + (m.user === currentUser ? 'justify-end' : 'justify-start');
-
-    if(m.user === currentUser){
-      const bubble = document.createElement('div');
-      bubble.className = 'px-4 py-2 rounded-2xl max-w-md shadow-md';
-      bubble.style.background = '#6d28d9'; bubble.style.color='white';
-      bubble.innerHTML = `<div class="text-sm">${escapeHtml(m.text)}</div>`;
-      wrapper.appendChild(bubble);
-    } else {
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      const u = users.find(x => x.username === m.user) || {};
-      const left = document.createElement('div');
-      left.className = 'flex items-center gap-3';
-      const img = document.createElement('img');
-      img.className = 'w-8 h-8 rounded-full object-cover';
-      img.src = u.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"></svg>';
-      img.alt = m.user;
-      const info = document.createElement('div');
-      info.className = 'text-sm';
-      info.innerHTML = `<strong>${escapeHtml(m.user)}</strong><div class="text-xs text-gray-200">${escapeHtml(m.text)}</div>`;
-      left.appendChild(img);
-      left.appendChild(info);
-      wrapper.appendChild(left);
-    }
-
-    messages.appendChild(wrapper);
-  }
+  messagesArr.forEach(m=>{
+    const div = document.createElement('div');
+    div.className = 'flex ' + (m.user===currentUser ? 'justify-end' : 'justify-start');
+    div.innerHTML = `<div class="px-4 py-2 rounded-2xl max-w-xs ${m.user===currentUser?'bg-purple-600':'bg-gray-700'} text-white shadow">
+      <strong>${escapeHtml(m.user)}</strong><br>${escapeHtml(m.text)}
+    </div>`;
+    messages.appendChild(div);
+  });
   messages.scrollTop = messages.scrollHeight;
 }
 
-/* --- FOYDALANUVCHI RO'YXATINI YUKLASH --- */
+/* --- Foydalanuvchilar ro‘yxati --- */
 function loadUsers(){
   let users = JSON.parse(localStorage.getItem('users')) || [];
-  const userList = document.getElementById('userList');
-  userList.innerHTML = '';
-  users.forEach(u => {
+  const list = document.getElementById('userList');
+  list.innerHTML = '';
+  users.forEach(u=>{
     const li = document.createElement('li');
-    li.className = 'flex items-center gap-3 p-2 rounded-lg ' + (u.username === currentUser ? 'bg-indigo-700 font-semibold' : 'bg-gray-700');
-    const img = document.createElement('img');
-    img.className = 'w-10 h-10 rounded-full object-cover';
-    img.src = u.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"></svg>';
-    img.alt = u.username;
-    const name = document.createElement('div');
-    name.innerText = u.username;
-    li.appendChild(img);
-    li.appendChild(name);
-    userList.appendChild(li);
+    li.className = 'flex items-center gap-2 p-2 bg-gray-700 rounded-lg';
+    li.innerHTML = `<img src="${u.avatar || 'https://via.placeholder.com/40'}" class="w-8 h-8 rounded-full"><span>${u.username}</span>`;
+    list.appendChild(li);
   });
 }
 
-/* === Profil modal populyatsiyasi === */
+/* --- Profil ma’lumotlari --- */
 function populateProfileModal(){
-  const users = JSON.parse(localStorage.getItem('users')) || [];
-  const u = users.find(x => x.username === currentUser);
+  let users = JSON.parse(localStorage.getItem('users')) || [];
+  const u = users.find(x=>x.username===currentUser);
   if(!u) return;
   document.getElementById('profileNameDisplay').innerText = u.username;
-  document.getElementById('profileAvatarPreview').src = u.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"></svg>';
-  // fayl inputga o'zgartirish bo'lganda saqlash
-  const input = document.getElementById('profileAvatarInput');
-  input.onchange = function(e){
+  document.getElementById('profileAvatarPreview').src = u.avatar || 'https://via.placeholder.com/80';
+  document.getElementById('profileAvatarInput').onchange = function(e){
     const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      const data = ev.target.result;
-      saveAvatarForCurrentUser(data);
-    };
-    reader.readAsDataURL(file);
+    if(file){
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        u.avatar = ev.target.result;
+        localStorage.setItem('users', JSON.stringify(users));
+        populateProfileModal(); loadUsers();
+      };
+      reader.readAsDataURL(file);
+    }
   };
 }
 
-/* --- avatar saqlash --- */
-function saveAvatarForCurrentUser(dataUrl){
-  let users = JSON.parse(localStorage.getItem('users')) || [];
-  users = users.map(u => u.username === currentUser ? ({...u, avatar: dataUrl}) : u);
-  localStorage.setItem('users', JSON.stringify(users));
-  populateProfileModal();
-  loadUsers();
-  alert('Avatar yangilandi!');
-}
-
-/* --- parolni o'zgartirish --- */
+/* --- Parolni o‘zgartirish --- */
 function changePassword(){
   const cur = document.getElementById('currentPass').value.trim();
   const neu = document.getElementById('newPass').value.trim();
-  if(!cur || !neu){ alert('Ikkala maydonni ham to\'ldiring'); return; }
   let users = JSON.parse(localStorage.getItem('users')) || [];
-  const idx = users.findIndex(u => u.username === currentUser);
-  if(idx === -1){ alert('Foydalanuvchi topilmadi'); return; }
-  if(users[idx].password !== cur){ alert('Joriy parol noto\'g\'ri'); return; }
-  users[idx].password = neu;
+  const u = users.find(x=>x.username===currentUser);
+  if(!u) return;
+  if(u.password!==cur){ alert('Joriy parol noto‘g‘ri!'); return; }
+  u.password = neu;
   localStorage.setItem('users', JSON.stringify(users));
-  document.getElementById('currentPass').value = "";
-  document.getElementById('newPass').value = "";
-  alert('Parol muvaffaqiyatli o\'zgartirildi');
-}
-
-/* --- akkauntni o'chirish --- */
-function deleteAccount(){
-  if(!confirm('Haqiqatan akkauntingizni o\'chirmoqchimisiz? Bu barcha ma\'lumotlar — profil va xabarlaringizni o\'chiradi.')) return;
-  let users = JSON.parse(localStorage.getItem('users')) || [];
-  users = users.filter(u => u.username !== currentUser);
-  localStorage.setItem('users', JSON.stringify(users));
-
-  // foydalanuvchining xabarlarini ham o'chirish
-  let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
-  chatHistory = chatHistory.filter(m => m.user !== currentUser);
-  localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-
-  alert('Akkaunt o\'chirildi');
+  alert('Parol o‘zgartirildi!');
   closeProfile();
-  closeChat();
 }
 
-/* === YORDAMCHI: HTML escaping to prevent injection in this local demo === */
-function escapeHtml(str){
-  if(!str) return '';
-  return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+/* --- Akkauntni o‘chirish --- */
+function deleteAccount(){
+  if(!confirm('Akkauntingizni o‘chirishni xohlaysizmi?')) return;
+  let users = JSON.parse(localStorage.getItem('users')) || [];
+  users = users.filter(u=>u.username!==currentUser);
+  localStorage.setItem('users', JSON.stringify(users));
+  let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+  chatHistory = chatHistory.filter(m=>m.user!==currentUser);
+  localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  alert('Akkaunt o‘chirildi');
+  closeProfile(); closeChat();
 }
 
-/* ---- boshlang'ich: agar oldin foydalanuvchilar bo'lsa, yuklash (demo uchun) ---- */
-(function initDemo(){
-  if(!localStorage.getItem('users')){
-    // demo foydalanuvchi (xohlamasangiz bu blokni olib tashlang)
-    const demo = [
-      { username: 'ali', password: '1234', avatar: null },
-      { username: 'vali', password: '5678', avatar: null }
-    ];
-    localStorage.setItem('users', JSON.stringify(demo));
-  }
-})();
+/* --- HTML xavfsizlik uchun --- */
+function escapeHtml(str){ return str.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
 </script>
 </body>
 </html>
