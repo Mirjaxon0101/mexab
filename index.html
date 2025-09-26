@@ -2,137 +2,95 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Chat Sayt</title>
+  <title>Chat va Foydalanuvchilar</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen flex flex-col items-center text-white">
+<body class="bg-gray-900 text-white p-6">
+  <h1 class="text-2xl font-bold mb-4">Chat Xonasi</h1>
 
-  <!-- Navbar -->
-  <header class="w-full p-4 bg-black/30 backdrop-blur-md fixed top-0 left-0 flex justify-between items-center shadow-lg z-40">
-    <h1 class="text-2xl font-bold">Chat Sayt</h1>
-    <div class="space-x-2">
-      <button onclick="openSignup()" class="px-4 py-2 bg-green-500 rounded-xl">Ro‘yxatdan o‘tish</button>
-      <button onclick="openLogin()" class="px-4 py-2 bg-white text-black rounded-xl">Kirish</button>
-    </div>
-  </header>
+  <!-- Chat oynasi -->
+  <div id="messages" class="p-4 overflow-y-auto h-64 bg-gray-800 rounded"></div>
 
-  <!-- Asosiy -->
-  <main class="text-center mt-32 w-full max-w-3xl px-6">
-    <h2 class="text-5xl font-extrabold">Xush kelibsiz!</h2>
-    <p class="mt-4 text-lg">Ro‘yxatdan o‘ting yoki kirib chatni boshlang 🚀</p>
-  </main>
-
-  <!-- Chat ekran -->
-  <div id="chatScreen" class="hidden fixed inset-0 bg-gradient-to-r from-gray-900 via-purple-900 to-black flex z-30">
-    <!-- Foydalanuvchilar -->
-    <aside class="w-72 bg-black/50 p-4 border-r border-gray-700 overflow-y-auto">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold">Foydalanuvchilar</h2>
-      </div>
-      <ul id="userList" class="space-y-3 text-gray-200"></ul>
-    </aside>
-
-    <!-- Chat -->
-    <div class="flex-1 flex flex-col">
-      <header class="p-4 bg-black/40 text-white flex justify-between items-center">
-        <h2 class="text-xl font-bold">Chat</h2>
-        <button onclick="logout()" class="px-3 py-1 bg-red-600 rounded-lg">Chiqish</button>
-      </header>
-      <div id="messages" class="flex-1 p-6 overflow-y-auto space-y-3"></div>
-      <footer class="p-4 bg-black/40 flex gap-2">
-        <input id="messageInput" type="text" placeholder="Xabar yozing..."
-          class="flex-1 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-purple-500">
-        <button onclick="sendMessage()" class="px-4 py-2 bg-purple-600 rounded-lg">Yubor</button>
-      </footer>
-    </div>
+  <!-- Xabar yuborish -->
+  <div class="flex mt-2">
+    <input id="messageInput" type="text" placeholder="Xabar yozing..."
+           class="flex-1 px-3 py-2 rounded-l text-black">
+    <button id="sendBtn"
+            class="bg-purple-600 px-4 py-2 rounded-r hover:bg-purple-700">Yubor</button>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+  <!-- Foydalanuvchilar ro'yxati -->
+  <div id="usersList" class="p-4 bg-gray-800 text-white mt-6 rounded">
+    <h2 class="font-bold mb-2">Foydalanuvchilar</h2>
+    <ul id="users"></ul>
+  </div>
 
-  // 🔥 Firebase config (o'zingniki bilan almashtir)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCg3pemPiNzltp5GulkwWGmoEFRJ0BYVcA",
-    authDomain: "chat-sayt.firebaseapp.com",
-    projectId: "chat-sayt",
-    storageBucket: "chat-sayt.firebasestorage.app",
-    messagingSenderId: "310136336599",
-    appId: "1:310136336599:web:956bb81e764a6643cd0092",
-    measurementId: "G-1BEZGKXR0E"
-  };
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    // 🔑 Firebase configni o'zingniki bilan almashtir
+    const firebaseConfig = {
+      apiKey: "YOUR-API-KEY",
+      authDomain: "YOUR-PROJECT-ID.firebaseapp.com",
+      projectId: "YOUR-PROJECT-ID",
+      storageBucket: "YOUR-PROJECT-ID.appspot.com",
+      messagingSenderId: "YOUR-SENDER-ID",
+      appId: "YOUR-APP-ID"
+    };
 
-  let currentUser = null;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  // Ro'yxatdan o‘tish
-  window.openSignup = function() {
-    const name = prompt("Ismingiz:");
-    if (!name) return;
-    currentUser = name;
-    document.getElementById("chatScreen").classList.remove("hidden");
-    loadMessages();
-    loadUsers();
-  }
+    // 👤 Foydalanuvchi ismi
+    const username = prompt("Ismingizni kiriting:") || "Noma'lum";
 
-  // Kirish
-  window.openLogin = function() {
-    const name = prompt("Ismingiz:");
-    if (!name) return;
-    currentUser = name;
-    document.getElementById("chatScreen").classList.remove("hidden");
-    loadMessages();
-    loadUsers();
-  }
-
-  // Chiqish
-  window.logout = function() {
-    currentUser = null;
-    document.getElementById("chatScreen").classList.add("hidden");
-  }
-
-  // Xabar yuborish
-  window.sendMessage = async function() {
-    const input = document.getElementById("messageInput");
-    const text = input.value.trim();
-    if (!text || !currentUser) return;
-    await addDoc(collection(db, "messages"), {
-      user: currentUser,
-      text,
-      time: Date.now()
+    // Foydalanuvchini ro'yhatga qo'shish
+    const userRef = doc(db, "users", username);
+    await setDoc(userRef, {
+      name: username,
+      joined: serverTimestamp()
     });
-    input.value = "";
-  }
 
-  // Xabarlarni yuklash
-  function loadMessages() {
+    // ✉️ Xabar yuborish
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("messageInput");
+    sendBtn.addEventListener("click", async () => {
+      if (messageInput.value.trim() !== "") {
+        await addDoc(collection(db, "messages"), {
+          name: username,
+          text: messageInput.value,
+          time: serverTimestamp()
+        });
+        messageInput.value = "";
+      }
+    });
+
+    // 📩 Xabarlarni real vaqtda olish
+    const messagesDiv = document.getElementById("messages");
     const q = query(collection(db, "messages"), orderBy("time"));
     onSnapshot(q, (snapshot) => {
-      const messagesDiv = document.getElementById("messages");
       messagesDiv.innerHTML = "";
       snapshot.forEach((doc) => {
-        const m = doc.data();
-        const div = document.createElement("div");
-        div.className = "flex " + (m.user === currentUser ? "justify-end" : "justify-start");
-        div.innerHTML = `<div class="px-4 py-2 rounded-2xl max-w-xs ${m.user===currentUser?'bg-purple-600':'bg-gray-700'} text-white shadow">
-          <strong>${m.user}</strong><br>${m.text}
-        </div>`;
-        messagesDiv.appendChild(div);
+        const msg = doc.data();
+        const p = document.createElement("p");
+        p.innerHTML = `<strong>${msg.name}:</strong> ${msg.text}`;
+        messagesDiv.appendChild(p);
       });
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
-  }
 
-  // Foydalanuvchilar ro‘yxati
-  function loadUsers() {
-    const userList = document.getElementById("userList");
-    userList.innerHTML = "";
-    const li = document.createElement("li");
-    li.innerHTML = `<span class="bg-green-600 w-3 h-3 rounded-full inline-block mr-2"></span>${currentUser}`;
-    userList.appendChild(li);
-  }
-</script>
+    // 👥 Foydalanuvchilar ro'yxati
+    const usersList = document.getElementById("users");
+    onSnapshot(collection(db, "users"), (snapshot) => {
+      usersList.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const li = document.createElement("li");
+        li.textContent = doc.data().name;
+        usersList.appendChild(li);
+      });
+    });
+  </script>
 </body>
 </html>
