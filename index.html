@@ -1,78 +1,214 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <title>Modern Blog</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fizika Master Test</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #1e3a8a, #6d28d9);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+    }
+    .option-btn {
+      transition: all 0.2s ease-in-out;
+    }
+    .option-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex flex-col">
-  
-  <!-- Navbar -->
-  <header class="w-full bg-white/10 backdrop-blur-lg text-white shadow-lg p-4 fixed top-0 left-0 z-50">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-extrabold tracking-wide">✨ My blog</h1>
-      <nav class="space-x-6 hidden md:flex">
-        <a href="#" class="hover:text-yellow-300 transition">Home page</a>
-        <a href="#" class="hover:text-yellow-300 transition">Articles</a>
-        <a href="#" class="hover:text-yellow-300 transition">Communication</a>
-      </nav>
+<body class="min-h-screen flex flex-col items-center justify-center text-center p-4">
+
+  <!-- Bosh menyu -->
+  <div id="menu" class="space-y-6">
+    <h1 class="text-4xl font-bold mb-6">⚡ Fizika Master Test ⚡</h1>
+    <p class="text-lg mb-8">Bo‘limni tanlang:</p>
+
+    <div class="grid gap-4 w-full max-w-md">
+      <button onclick="startTest('fall')" class="bg-blue-600 hover:bg-blue-700 py-3 rounded-xl text-xl">1️⃣ Erkin tushish</button>
+      <button onclick="startTest('speed')" class="bg-green-600 hover:bg-green-700 py-3 rounded-xl text-xl">2️⃣ O‘rtacha tezlik</button>
+      <button onclick="startTest('volume')" class="bg-purple-600 hover:bg-purple-700 py-3 rounded-xl text-xl">3️⃣ Hajm va Yuza</button>
     </div>
-  </header>
+  </div>
 
-  <!-- Blog Content -->
-  <main class="flex-1 pt-24 pb-12 px-4">
-    <div class="max-w-4xl mx-auto space-y-10">
-      
-      <!-- Blog Card 1 -->
-      <article class="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1">
-        <h2 class="text-2xl font-bold text-indigo-700">🌟 First post</h2>
-        <p class="text-sm text-gray-500"><h1>MY FIRST DAY IN SCHOOL</h1></p>
-        <p class="mt-3 text-gray-700 leading-relaxed"> My first day at school wasn't very good. But there were also happy memories on that day. My classmates also came. They ran to meet me. We shared memories of the 3-month vacation, talked, and then the classes started. That day there was mathematics and we had a new mathematics teacher. His name was Sanjar. Then it was English and there was a new teacher. In short, I can say that this day was wonderful.🚀</p>
-        <button class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">Davomini o‘qish →</button>
-      </article>
+  <!-- Test sahifasi -->
+  <div id="test-container" class="hidden w-full max-w-3xl"></div>
 
-      <!-- Blog Card 2 -->
-      <article class="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1">
-        <h2 class="text-2xl font-bold text-pink-700">🔥 Second post</h2>
-        <p class="text-sm text-gray-500">📅 News at school | ✍️ Admin</p>
-        <p class="mt-3 text-gray-700 leading-relaxed">There have been a lot of changes in our school in the past 2 years. We are the reason for all this. Because we voted for "Openbudget" and won. Then the construction began with the director.
-The things that were built were a stadium, a playground, a basketball and volleyball court.</p>
-        <button class="mt-4 px-4 py-2 bg-pink-600 text-white rounded-xl hover:bg-pink-700 transition">Davomini o‘qish →</button>
-      </article>
+<script>
+/* ========== TEST MA'LUMOTLARI ========== */
+/* Agar seni faylda allaqachon tests.fall / tests.speed / tests.volume aniqlari bo'lsa,
+   ularni takrorlamaslik uchun quyidagisini olib tashlashing mumkin.
+   Mana bu yerga avvalgi arrayslarni to'liq joylashtiraman (sening variantlaring bilan) */
+const tests = {
+  fall: [
+    { q: "1. Jism 5 soniya erkin tushdi. Agar g = 10 m/s² bo‘lsa, u qancha masofa bosib o‘tgan?", options: ["100 m","125 m","150 m","250 m"], correct: 1 },
+    { q: "2. Jism 20 m/s tezlik bilan yuqoriga otiladi. Qancha vaqtdan keyin u eng yuqori nuqtaga chiqadi?", options: ["1 s","2 s","3 s","4 s"], correct: 1 },
+    { q: "3. Jism 80 m balandlikdan erkin tushadi. U yerga urilishdan oldin tezligi qanday?", options: ["20 m/s","30 m/s","40 m/s","50 m/s"], correct: 2 },
+    { q: "4. Jism 100 m balandlikdan erkin tushdi. Tushish vaqti taxminan qancha?", options: ["4 s","5 s","6 s","7 s"], correct: 1 },
+    { q: "5. Jism 10 m/s tezlik bilan yuqoriga otiladi. Qancha vaqtdan keyin u yana boshlang‘ich nuqtasiga qaytadi?", options: ["1 s","2 s","3 s","4 s"], correct: 1 },
+    { q: "6. Jism 2 s davomida erkin tushdi. Shu vaqt ichida bosib o‘tgan masofa?", options: ["10 m","15 m","20 m","25 m"], correct: 2 },
+    { q: "7. Jism 50 m balandlikdan tushgan. Tezligi 20 m/s bo‘lsa, g ni toping.", options: ["8 m/s²","9 m/s²","10 m/s²","12 m/s²"], correct: 2 },
+    { q: "8. Jism 25 m/s tezlik bilan yuqoriga otilgan. U qancha balandlikka ko‘tariladi?", options: ["25 m","31.25 m","40 m","50 m"], correct: 1 },
+    { q: "9. Jism 3 s da 45 m masofa bosdi. g ni toping.", options: ["9 m/s²","10 m/s²","15 m/s²","20 m/s²"], correct: 1 },
+    { q: "10. Jism 5 s erkin tushdi. Uning oxirgi tezligi?", options: ["25 m/s","40 m/s","45 m/s","50 m/s"], correct: 3 },
+    { q: "11. Jism 30 m/s tezlik bilan yuqoriga otilsa, u eng yuqori nuqtaga chiqqanda tezligi qanday bo‘ladi?", options: ["30 m/s","10 m/s","0 m/s","15 m/s"], correct: 2 },
+    { q: "12. Jism 2 s da 20 m/s tezlikka ega bo‘ldi. g qiymati?", options: ["8 m/s²","9 m/s²","10 m/s²","12 m/s²"], correct: 2 },
+    { q: "13. Jism 60 m balandlikdan tushmoqda. Qancha vaqtdan keyin yerga uriladi?", options: ["3 s","4 s","5 s","6 s"], correct: 1 },
+    { q: "14. 15 m/s tezlik bilan yuqoriga otilgan jism qancha vaqtdan so‘ng qaytib tushishni boshlaydi?", options: ["1.5 s","2 s","3 s","4 s"], correct: 1 },
+    { q: "15. 80 m/s tezlik bilan yuqoriga otilgan jismning maksimal balandligi?", options: ["320 m","3200 m","400 m","800 m"], correct: 1 },
+    { q: "16. 40 m balandlikdan erkin tushayotgan jismning tezligi 2 s dan keyin qancha?", options: ["10 m/s","15 m/s","20 m/s","25 m/s"], correct: 2 },
+    { q: "17. Jism 3 s erkin tushdi. Shu vaqt ichida tezligi qanday o‘zgaradi?", options: ["O‘zgarmaydi","2 baravar kamayadi","Chiziqli ortadi","Kvadratga ortadi"], correct: 2 },
+    { q: "18. 25 m balandlikdan tushayotgan jismning 1.5 s dagi tezligi?", options: ["10 m/s","12 m/s","14 m/s","15 m/s"], correct: 1 },
+    { q: "19. Jism 1 s dan 3 s gacha bo‘lgan oraliqda qancha masofa bosib o‘tadi?", options: ["15 m","20 m","25 m","30 m"], correct: 2 },
+    { q: "20. Erkin tushishda tezlik qanday ortadi?", options: ["Chiziqli","Kvadratga","Eksponental","O‘zgarmaydi"], correct: 0 }
+  ],
 
-      <!-- Blog Card 3 -->
-      <article class="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1">
-        <h2 class="text-2xl font-bold text-purple-700">💡 Third post</h2>
-        <p class="text-sm text-gray-500">📅 2025-10-17 | ✍️ Admin</p>
-        <p class="mt-3 text-gray-700 leading-relaxed">Creating a blog is a wonderful way to share your ideas and experiences with people around the world. If you want to start your own blog, follow these simple steps.
+  speed: [
+    { q: "1. Mashina 60 km masofani 2 soatda, keyin 40 km masofani 1 soatda bosdi. O‘rtacha tezligi?", options: ["40 km/h","45 km/h","50 km/h","55 km/h"], correct: 2 },
+    { q: "2. Poyezd yo‘lning yarmida 30 km/h, qolganida 60 km/h tezlik bilan yurdi. O‘rtacha tezlik?", options: ["40 km/h","45 km/h","50 km/h","55 km/h"], correct: 1 },
+    { q: "3. Avval 2 soat 40 km/h, keyin 3 soat 60 km/h tezlik bilan yurdi. O‘rtacha tezlik?", options: ["48 km/h","50 km/h","52 km/h","54 km/h"], correct: 1 },
+    { q: "4. Piyoda 3 km yo‘lni 4 km/h, keyin 2 km yo‘lni 2 km/h bilan bosdi. O‘rtacha tezlik?", options: ["2.4 km/h","2.5 km/h","2.6 km/h","3 km/h"], correct: 1 },
+    { q: "5. Mashina 100 km masofani 2 soatda borib, 4 soatda qaytdi. O‘rtacha tezlik?", options: ["33.3 km/h","40 km/h","45 km/h","50 km/h"], correct: 0 },
+    { q: "6. Jism 10 m/s dan 30 m/s gacha 5 s da tezlashdi. O‘rtacha tezligi?", options: ["15 m/s","20 m/s","25 m/s","30 m/s"], correct: 1 },
+    { q: "7. Mashina birinchi 1 soat 80 km/h, keyin 2 soat 40 km/h tezlik bilan yurdi. O‘rtacha tezlik?", options: ["53.3 km/h","60 km/h","66.6 km/h","70 km/h"], correct: 0 },
+    { q: "8. Poyezd 2 soat 60 km/h, 1 soat 90 km/h tezlik bilan yurdi. O‘rtacha tezlik?", options: ["65 km/h","70 km/h","75 km/h","80 km/h"], correct: 2 },
+    { q: "9. Avtomobil 30 km/h tezlik bilan 2 soat, so‘ng 60 km/h tezlik bilan 1 soat yurdi. O‘rtacha tezlik?", options: ["35 km/h","40 km/h","45 km/h","50 km/h"], correct: 1 },
+    { q: "10. Jism 12 m/s dan 24 m/s gacha 4 s da tezlashadi. O‘rtacha tezlik?", options: ["14 m/s","16 m/s","18 m/s","20 m/s"], correct: 2 },
+    { q: "11. Mashina 60 km masofani 1 soatda, keyin 40 km masofani 2 soatda bosdi. O‘rtacha tezlik?", options: ["33.3 km/h","36.6 km/h","40 km/h","45 km/h"], correct: 1 },
+    { q: "12. Avtomobil 80 km/h tezlik bilan 30 minut, keyin 40 km/h tezlik bilan 30 minut yurdi. O‘rtacha tezlik?", options: ["50 km/h","55 km/h","60 km/h","65 km/h"], correct: 0 },
+    { q: "13. Mashina 2 soat 90 km/h, keyin 1 soat 45 km/h tezlikda yurdi. O‘rtacha tezlik?", options: ["60 km/h","70 km/h","75 km/h","80 km/h"], correct: 1 },
+    { q: "14. Jism 100 m masofani 5 s da bosdi. O‘rtacha tezlik?", options: ["10 m/s","15 m/s","20 m/s","25 m/s"], correct: 2 },
+    { q: "15. Poyezd 2 soat 100 km/h, 3 soat 60 km/h bilan yurdi. O‘rtacha tezlik?", options: ["70 km/h","72 km/h","74 km/h","76 km/h"], correct: 1 },
+    { q: "16. Mashina 4 soat 50 km/h, 1 soat 100 km/h tezlikda yurdi. O‘rtacha tezlik?", options: ["55 km/h","60 km/h","65 km/h","70 km/h"], correct: 1 },
+    { q: "17. Jismning tezligi 10 m/s dan 40 m/s gacha 6 s da oshdi. O‘rtacha tezlik?", options: ["20 m/s","25 m/s","30 m/s","35 m/s"], correct: 1 },
+    { q: "18. Avtomobil 2 soat 60 km/h, keyin 2 soat 120 km/h tezlik bilan yurdi. O‘rtacha tezlik?", options: ["80 km/h","90 km/h","100 km/h","110 km/h"], correct: 2 },
+    { q: "19. Piyoda 1 km yo‘lni 10 daqiqada bosdi. O‘rtacha tezlik?", options: ["4 m/s","1.5 m/s","1.67 m/s","2 m/s"], correct: 2 },
+    { q: "20. Jism 3 s da 12 m yo‘l bosdi. O‘rtacha tezlik?", options: ["2 m/s","3 m/s","4 m/s","5 m/s"], correct: 2 }
+  ],
 
-First, choose a topic that you are passionate about. It could be anything like cooking, traveling, technology, or fashion. Picking the right topic helps you stay motivated and attract readers who are interested in the same subject.
+  volume: [
+    { q: "1. Kubning hajmi 125 sm³. Uning yuzasini toping.", options: ["100 sm²","125 sm²","150 sm²","250 sm²"], correct: 3 },
+    { q: "2. Sharning radiusi 3 sm. Hajmi (V = 4/3πr³) ni toping (π=3.14).", options: ["84.6 sm³","100 sm³","113.1 sm³","150 sm³"], correct: 2 },
+    { q: "3. Kubning yon tomoni 6 sm. Uning hajmi va yuzasi orasidagi nisbat?", options: ["1:1","2:1","3:1","1:3"], correct: 2 },
+    { q: "4. Silindrning asos radiusi 4 sm, balandligi 6 sm. Hajmini toping (π=3.14).", options: ["301 sm³","400 sm³","452 sm³","603 sm³"], correct: 3 },
+    { q: "5. To‘g‘ri burchakli parallelepipedning o‘lchamlari 2×3×4 sm. Hajmini toping.", options: ["18 sm³","20 sm³","24 sm³","30 sm³"], correct: 2 },
+    { q: "6. Radiusi 5 sm bo‘lgan sharning yuzasi (S = 4πr²) ni toping (π=3.14).", options: ["300 sm²","314 sm²","350 sm²","400 sm²"], correct: 1 },
+    { q: "7. Kubning yuzasi 216 sm². Yon tomon uzunligi?", options: ["4 sm","5 sm","6 sm","8 sm"], correct: 2 },
+    { q: "8. Konusning radiusi 3 sm, balandligi 4 sm. Hajmi (V = 1/3πr²h)?", options: ["24 sm³","28.3 sm³","30.1 sm³","35 sm³"], correct: 1 },
+    { q: "9. Silindr bilan bir xil radius va balandlikdagi konusning hajmlari nisbati?", options: ["1:1","1:2","1:3","3:1"], correct: 2 },
+    { q: "10. Radiusi 7 sm bo‘lgan sharning hajmini toping (π=3.14).", options: ["1000 sm³","1200 sm³","1436 sm³","1500 sm³"], correct: 2 },
+    { q: "11. Yon tomoni 9 sm bo‘lgan kubning hajmi?", options: ["729 sm³","650 sm³","800 sm³","900 sm³"], correct: 0 },
+    { q: "12. Sharning hajmi 36π sm³. Uning radiusini toping (V = 4/3πr³).", options: ["2 sm","3 sm","4 sm","5 sm"], correct: 1 },
+    { q: "13. Radiusi 4 sm, balandligi 9 sm bo‘lgan silindrning hajmi?", options: ["300 sm³","400 sm³","452 sm³","452.2 sm³"], correct: 3 },
+    { q: "14. Kubning hajmi 64 sm³. Uning bitta qirrasi?", options: ["2 sm","3 sm","4 sm","5 sm"], correct: 2 },
+    { q: "15. To‘g‘ri burchakli prizmaning hajmi 120 sm³, asos yuzasi 24 sm². Balandligi?", options: ["4 sm","5 sm","6 sm","7 sm"], correct: 1 },
+    { q: "16. Sharning yuzasi 113.04 sm². Uning radiusini toping (π=3.14).", options: ["2 sm","3 sm","4 sm","5 sm"], correct: 2 },
+    { q: "17. Silindr hajmi 150.72 sm³, radiusi 3 sm. Balandligi (π=3.14)?", options: ["4 sm","5 sm","6 sm","7 sm"], correct: 2 },
+    { q: "18. Konus hajmi 100.48 sm³, radiusi 4 sm. Balandligi (π=3.14)?", options: ["5 sm","6 sm","7 sm","8 sm"], correct: 2 },
+    { q: "19. Sharning radiusi 2 baravar oshsa, hajmi necha marta ortadi?", options: ["2 marta","4 marta","6 marta","8 marta"], correct: 3 },
+    { q: "20. Kubning hajmi 8 baravar oshsa, uning qirrasi necha marta ortadi?", options: ["2 marta","3 marta","4 marta","8 marta"], correct: 0 }
+  ]
+};
 
-Next, select a blogging platform. Popular platforms include WordPress, Blogger, and Medium. These websites offer easy tools to create and customize your blog without needing special technical skills.
+/* ========== GLOBAL O'ZGARUVLAR ========== */
+let currentTest = [];
+let currentCategory = "";
+let selected = [];
 
-After that, pick a domain name for your blog. A good domain name should be unique and easy to remember. You can use a free domain offered by the platform or buy your own custom domain to make your blog look more professional.
+/* ========== BOSHLASH / SAHIFANI YARATISH ========== */
+function startTest(category) {
+  currentCategory = category;
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("test-container").classList.remove("hidden");
+  loadTests(category);
+}
 
-Then, design your blog by choosing a theme or layout that fits your style. A clean and attractive design helps visitors enjoy their time on your blog and find information easily.
+/* loadTests: savollarni sahifaga chiqaradi va tugmalar uchun event qo'yadi */
+function loadTests(category) {
+  currentTest = tests[category] || [];
+  selected = Array(currentTest.length).fill(null);
 
-Now, start writing your posts. Write clear, interesting, and useful content that will engage your readers. Adding images and videos can make your posts more appealing.
-
-Don’t forget to promote your blog. Share your articles on social media, connect with other bloggers, and respond to your readers' comments. This will help you build a community around your blog.
-
-Finally, be consistent. Keep posting new content regularly to keep your audience interested and to grow your blog over time.
-
-Blogging takes effort, but it is very rewarding. With dedication and creativity, your blog can become a successful platform to express yourself and connect with others</p>
-        <button class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition">Davomini o‘qish →</button>
-      </article>
-
+  const container = document.getElementById("test-container");
+  container.innerHTML = `
+    <h2 class="text-3xl font-semibold mb-4">${category === 'fall' ? 'Erkin tushish' : category === 'speed' ? 'O‘rtacha tezlik' : 'Hajm va Yuza'}</h2>
+    <div id="question-list" class="space-y-4"></div>
+    <div class="flex items-center gap-4 mt-6">
+      <button id="resultBtn" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-xl">Natijani ko‘rish</button>
+      <button id="backBtn" class="bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-xl">⬅️ Orqaga</button>
+      <p id="result-display" class="ml-4 text-lg font-semibold hidden"></p>
     </div>
-  </main>
+  `;
 
-  <!-- Footer -->
-  <footer class="bg-black/40 backdrop-blur-lg text-white text-center p-6 mt-auto">
-    © 2025 Mening Blogim. <br> Barcha huquqlar himoyalangan.
-  </footer>
+  const qList = container.querySelector("#question-list");
+
+  currentTest.forEach((qObj, idx) => {
+    const qDiv = document.createElement("div");
+    qDiv.className = "question bg-white/10 p-4 rounded-xl mb-4 text-left";
+
+    const qP = document.createElement("p");
+    qP.className = "font-semibold mb-3";
+    qP.textContent = qObj.q;
+    qDiv.appendChild(qP);
+
+    qObj.options.forEach((opt, j) => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn block w-full text-left bg-white/20 hover:bg-white/30 p-2 rounded mb-2 transition";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => selectAnswer(idx, j, btn));
+      qDiv.appendChild(btn);
+    });
+
+    qList.appendChild(qDiv);
+  });
+
+  document.getElementById("resultBtn").addEventListener("click", showResult);
+  document.getElementById("backBtn").addEventListener("click", goBack);
+}
+
+/* selectAnswer: tanlangan variantni belgilaydi (qayta tanlash mumkin) */
+function selectAnswer(qIndex, optionIndex, btn) {
+  const qDiv = document.querySelectorAll(".question")[qIndex];
+  const buttons = qDiv.querySelectorAll("button");
+  // avvalgi belgilashlarni olib tashlash
+  buttons.forEach(b => {
+    b.classList.remove("bg-green-500", "bg-red-500", "selected");
+    b.disabled = false; // agar xohlasang disabled qilish mumkin, hozir ruxsat beramiz
+  });
+
+  // yangi tanlovni saqlaymiz
+  selected[qIndex] = optionIndex;
+
+  // rang beramiz
+  if (optionIndex === currentTest[qIndex].correct) {
+    btn.classList.add("bg-green-500", "selected");
+  } else {
+    btn.classList.add("bg-red-500", "selected");
+  }
+}
+
+/* showResult: natijani hisoblab ko'rsatadi */
+function showResult() {
+  const total = currentTest.length;
+  let correctCount = 0;
+  selected.forEach((ans, i) => {
+    if (ans === currentTest[i].correct) correctCount++;
+  });
+  const percent = total ? Math.round((correctCount / total) * 100) : 0;
+  const display = document.getElementById("result-display");
+  display.textContent = `Natija: ${correctCount} ta to‘g‘ri, ${total} tadan (${percent}%)`;
+  display.classList.remove("hidden");
+  display.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* goBack: menyuga qaytish */
+function goBack() {
+  document.getElementById("test-container").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
+  // tozalash
+  document.getElementById("test-container").innerHTML = "";
+}
+</script>
 </body>
 </html>
-
-
-
